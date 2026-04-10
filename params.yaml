@@ -1,0 +1,16 @@
+split:
+  test_size: 0.2
+  random_state: 123
+  stratify: true
+
+train:
+  random_seed: 123
+  experiment_name: fraud-baselines
+
+logreg:
+  max_iter: 1000
+  C: 1.0
+
+random_forest:
+  n_estimators: 300
+  max_depth: null

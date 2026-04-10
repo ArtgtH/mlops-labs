@@ -1,0 +1,86 @@
+[project]
+name = "mlops"
+version = "0.1.0"
+description = ""
+authors = [
+    {name = "artem",email = "a.vichuk@skbkontur.ru"}
+]
+requires-python = ">=3.14"
+dependencies = [
+    "fastapi (>=0.135.1,<0.136.0)",
+    "granian (>=2.7.2,<3.0.0)"
+]
+
+
+[dependency-groups]
+eda = [
+    "numpy (>=2.4.2,<3.0.0)",
+    "matplotlib (>=3.10.8,<4.0.0)",
+    "seaborn (>=0.13.2,<0.14.0)",
+    "jupyter (>=1.1.1,<2.0.0)",
+    "scipy (>=1.17.1,<2.0.0)",
+    "notebook (>=7.5.4,<8.0.0)",
+    "scikit-learn (>=1.8.0,<2.0.0)",
+    "pandas (>=2.2,<3)",
+    "mlflow (>=3.10.1,<4.0.0)"
+]
+test = [
+    "pytest (>=9.0.2,<10.0.0)",
+    "ruff (>=0.15.5,<0.16.0)"
+]
+
+
+[tool.ruff]
+lint.select = [
+    "A",      # shadowing builtin
+    "E",      # pycodestyle errors
+    "W",      # pycodestyle warnings
+    "F",      # pyflakes
+    "C",      # flake8-comprehensions
+    "B",      # flake8-bugbear
+    "I",      # isort
+    "RUF",    # Ruff-specific rules
+    "PGH",    # pygrep-hooks
+    "S101",   # disable asserts in runtime
+    "SIM",    # flake8-simplify
+    "T201",   # check prints
+    "T203",   # check p-prints
+    "PERF",   # perflint
+    "SLOT",   # slots
+    "ASYNC",  # flake8-async
+]
+lint.ignore = [
+    "E501",   # line too long
+    "B008",   # do not perform function calls in argument defaults
+    "RUF001",
+    "RUF002",
+    "RUF003",
+    "SIM300",
+]
+exclude = [
+    "venv",
+    ".venv",
+    ".git",
+    "__pycache__",
+    ".mypy_cache",
+    ".pytest_cache",
+    ".ruff_cache",
+    ".user",
+    "htmlcov",
+]
+
+[tool.ruff.lint.isort]
+combine-as-imports = true
+order-by-type = false
+no-lines-before = ["local-folder"]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/**/*.py" = [
+    "S101", # asserts allowed in tests...
+]
+"__init__.py" = ["F401"] # unused imports
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"

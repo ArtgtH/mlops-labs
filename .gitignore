@@ -1,0 +1,16 @@
+.env.development
+.env
+*egg-info
+.venv
+.coverage
+.pytest_cache/
+.pipenv_cache/
+.idea/
+.vscode/
+tmp/
+__pycache__
+static/
+.mypy_cache/
+*.yaml.dec
+.ruff_cache
+dataset

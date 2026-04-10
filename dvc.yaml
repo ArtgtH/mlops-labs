@@ -1,0 +1,33 @@
+stages:
+  split:
+    cmd: app/.venv/bin/python dvc-workaround/split.py
+    deps:
+    - data/dataset
+    - dvc-workaround/split.py
+    params:
+    - split.random_state
+    - split.stratify
+    - split.test_size
+    outs:
+    - data/processed/test.csv
+    - data/processed/train.csv
+
+  train_models:
+    cmd: app/.venv/bin/python dvc-workaround/train_models.py
+    deps:
+    - data/processed/test.csv
+    - data/processed/train.csv
+    - dvc-workaround/train_models.py
+    params:
+    - logreg.C
+    - logreg.max_iter
+    - random_forest.max_depth
+    - random_forest.n_estimators
+    - train.experiment_name
+    - train.random_seed
+    outs:
+    - models/logreg.pkl
+    - models/random_forest.pkl
+    metrics:
+    - reports/metrics.json:
+        cache: false

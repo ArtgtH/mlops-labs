@@ -1,0 +1,63 @@
+schema: '2.0'
+stages:
+  split:
+    cmd: app/.venv/bin/python dvc-workaround/split.py
+    deps:
+    - path: data/dataset
+      hash: md5
+      md5: d7d4434708894b1d786706505defd2fe
+      size: 156435299
+    - path: dvc-workaround/split.py
+      hash: md5
+      md5: eab75f39f7a5f821dbe6083caa2fec6b
+      size: 966
+    params:
+      params.yaml:
+        split.random_state: 123
+        split.stratify: true
+        split.test_size: 0.2
+    outs:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 82db19aeadd23c3c63b7636847b84fe1
+      size: 31290987
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4f7c45c8b912f9465afad0bcafb8b780
+      size: 125142668
+  train_models:
+    cmd: app/.venv/bin/python dvc-workaround/train_models.py
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: 82db19aeadd23c3c63b7636847b84fe1
+      size: 31290987
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 4f7c45c8b912f9465afad0bcafb8b780
+      size: 125142668
+    - path: dvc-workaround/train_models.py
+      hash: md5
+      md5: e7a3fbd607ffd870ac5c6f582171527a
+      size: 6338
+    params:
+      params.yaml:
+        logreg.C: 1.0
+        logreg.max_iter: 1000
+        random_forest.max_depth:
+        random_forest.n_estimators: 300
+        train.experiment_name: fraud-baselines
+        train.random_seed: 123
+    outs:
+    - path: models/logreg.pkl
+      hash: md5
+      md5: 2e77f1f8a929812e7be66c1d7a428dc2
+      size: 2721
+    - path: models/random_forest.pkl
+      hash: md5
+      md5: 931817482d33e38c22f3d4e36f933e70
+      size: 9679673
+    - path: reports/metrics.json
+      hash: md5
+      md5: 77c7ff081bd3320fb28c53f8d9252920
+      size: 491

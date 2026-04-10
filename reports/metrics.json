@@ -1,0 +1,20 @@
+{
+  "target_col": "Class",
+  "n_features": 30,
+  "train_rows": 227845,
+  "valid_rows": 56962,
+  "results": {
+    "logreg": {
+      "valid_roc_auc": 0.9609465620800937,
+      "valid_pr_auc": 0.6893969360092937,
+      "valid_accuracy": 0.979459990871107
+    },
+    "random_forest": {
+      "valid_roc_auc": 0.9405584071698461,
+      "valid_pr_auc": 0.8089028203311296,
+      "valid_accuracy": 0.9993328885923949
+    }
+  },
+  "best_model": "logreg",
+  "best_valid_roc_auc": 0.9609465620800937
+}
