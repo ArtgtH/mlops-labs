@@ -1,16 +1,33 @@
 schema: '2.0'
 stages:
-  split:
-    cmd: app/.venv/bin/python dvc-workaround/split.py
+  load_data:
+    cmd: python scripts/load_data.py --url https://www.openml.org/data/download/22102452/dataset
+      --output data/raw/creditcard.arff
     deps:
-    - path: data/dataset
+    - path: scripts/load_data.py
+      hash: md5
+      md5: 4ec4d3c7a631aaa12f113573cc57e2b1
+      size: 1609
+    params:
+      params.yaml:
+        data.url: https://www.openml.org/data/download/22102452/dataset
+    outs:
+    - path: data/raw/creditcard.arff
       hash: md5
       md5: d7d4434708894b1d786706505defd2fe
       size: 156435299
-    - path: dvc-workaround/split.py
+  preprocess:
+    cmd: python scripts/preprocess.py --input data/raw/creditcard.arff --train-output
+      data/processed/train.csv --test-output data/processed/test.csv --params params.yaml
+    deps:
+    - path: data/raw/creditcard.arff
       hash: md5
-      md5: eab75f39f7a5f821dbe6083caa2fec6b
-      size: 966
+      md5: d7d4434708894b1d786706505defd2fe
+      size: 156435299
+    - path: scripts/preprocess.py
+      hash: md5
+      md5: 83538cad1744caa2280244f8b30ed849
+      size: 3045
     params:
       params.yaml:
         split.random_state: 123
@@ -19,45 +36,79 @@ stages:
     outs:
     - path: data/processed/test.csv
       hash: md5
-      md5: 82db19aeadd23c3c63b7636847b84fe1
-      size: 31290987
+      md5: a6291f389f881af49eaab6c3ab4e96b8
+      size: 31177063
     - path: data/processed/train.csv
       hash: md5
-      md5: 4f7c45c8b912f9465afad0bcafb8b780
-      size: 125142668
-  train_models:
-    cmd: app/.venv/bin/python dvc-workaround/train_models.py
+      md5: 5a94e0f7a0cfafc3e23e48b02239b154
+      size: 124686978
+  validate_data:
+    cmd: python scripts/validate_data.py --train data/processed/train.csv --test data/processed/test.csv
+      --output reports/gx_validation.json
     deps:
     - path: data/processed/test.csv
       hash: md5
-      md5: 82db19aeadd23c3c63b7636847b84fe1
-      size: 31290987
+      md5: a6291f389f881af49eaab6c3ab4e96b8
+      size: 31177063
     - path: data/processed/train.csv
       hash: md5
-      md5: 4f7c45c8b912f9465afad0bcafb8b780
-      size: 125142668
-    - path: dvc-workaround/train_models.py
+      md5: 5a94e0f7a0cfafc3e23e48b02239b154
+      size: 124686978
+    - path: scripts/validate_data.py
       hash: md5
-      md5: e7a3fbd607ffd870ac5c6f582171527a
-      size: 6338
+      md5: ce99785d3a84454be0b2aa73fb723a21
+      size: 2345
+    outs:
+    - path: reports/gx_validation.json
+      hash: md5
+      md5: b07b6e7d71b3eda66886387072d2a7ba
+      size: 10485
+  train:
+    cmd: python scripts/train.py --train data/processed/train.csv --test data/processed/test.csv
+      --params params.yaml --models-dir models --metrics-output reports/metrics.json
+    deps:
+    - path: data/processed/test.csv
+      hash: md5
+      md5: a6291f389f881af49eaab6c3ab4e96b8
+      size: 31177063
+    - path: data/processed/train.csv
+      hash: md5
+      md5: 5a94e0f7a0cfafc3e23e48b02239b154
+      size: 124686978
+    - path: reports/gx_validation.json
+      hash: md5
+      md5: b07b6e7d71b3eda66886387072d2a7ba
+      size: 10485
+    - path: scripts/train.py
+      hash: md5
+      md5: 230171fa87ce0c65e07790ee97885400
+      size: 6115
     params:
       params.yaml:
         logreg.C: 1.0
         logreg.max_iter: 1000
         random_forest.max_depth:
-        random_forest.n_estimators: 300
+        random_forest.n_estimators: 100
         train.experiment_name: fraud-baselines
         train.random_seed: 123
     outs:
+    - path: models/feature_columns.json
+      hash: md5
+      md5: 442f2879ece545dabcbed9eab6066143
+      size: 267
     - path: models/logreg.pkl
       hash: md5
-      md5: 2e77f1f8a929812e7be66c1d7a428dc2
+      md5: b5aa096c03d0a11d2eb84f053f683dff
+      size: 2721
+    - path: models/model.pkl
+      hash: md5
+      md5: b5aa096c03d0a11d2eb84f053f683dff
       size: 2721
     - path: models/random_forest.pkl
       hash: md5
-      md5: 931817482d33e38c22f3d4e36f933e70
-      size: 9679673
+      md5: b8146d42120759e360b8f7dad8034bd0
+      size: 3239193
     - path: reports/metrics.json
       hash: md5
-      md5: 77c7ff081bd3320fb28c53f8d9252920
-      size: 491
+      md5: 07d8ad9956f40df7f775ad370534ffe5
+      size: 992

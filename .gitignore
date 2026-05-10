@@ -14,3 +14,5 @@ static/
 *.yaml.dec
 .ruff_cache
 dataset
+/mlruns/
+/.dvc/local-storage/

@@ -1,33 +1,56 @@
 stages:
-  split:
-    cmd: app/.venv/bin/python dvc-workaround/split.py
+  load_data:
+    cmd: python scripts/load_data.py --url ${data.url} --output data/raw/creditcard.arff
     deps:
-    - data/dataset
-    - dvc-workaround/split.py
+      - scripts/load_data.py
     params:
-    - split.random_state
-    - split.stratify
-    - split.test_size
+      - data.url
     outs:
-    - data/processed/test.csv
-    - data/processed/train.csv
+      - data/raw/creditcard.arff
 
-  train_models:
-    cmd: app/.venv/bin/python dvc-workaround/train_models.py
+  preprocess:
+    cmd: python scripts/preprocess.py --input data/raw/creditcard.arff --train-output data/processed/train.csv --test-output data/processed/test.csv --params params.yaml
     deps:
-    - data/processed/test.csv
-    - data/processed/train.csv
-    - dvc-workaround/train_models.py
+      - data/raw/creditcard.arff
+      - scripts/preprocess.py
     params:
-    - logreg.C
-    - logreg.max_iter
-    - random_forest.max_depth
-    - random_forest.n_estimators
-    - train.experiment_name
-    - train.random_seed
+      - split.test_size
+      - split.random_state
+      - split.stratify
     outs:
-    - models/logreg.pkl
-    - models/random_forest.pkl
+      - data/processed/train.csv
+      - data/processed/test.csv
+
+  validate_data:
+    cmd: python scripts/validate_data.py --train data/processed/train.csv --test data/processed/test.csv --output reports/gx_validation.json
+    deps:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - scripts/validate_data.py
+    outs:
+      - reports/gx_validation.json:
+          cache: false
+
+  train:
+    cmd: python scripts/train.py --train data/processed/train.csv --test data/processed/test.csv --params params.yaml --models-dir models --metrics-output reports/metrics.json
+    deps:
+      - data/processed/train.csv
+      - data/processed/test.csv
+      - reports/gx_validation.json
+      - scripts/train.py
+    params:
+      - train.random_seed
+      - train.experiment_name
+      - logreg.max_iter
+      - logreg.C
+      - random_forest.n_estimators
+      - random_forest.max_depth
+    outs:
+      - models/logreg.pkl
+      - models/random_forest.pkl
+      - models/model.pkl
+      - models/feature_columns.json:
+          cache: false
     metrics:
-    - reports/metrics.json:
-        cache: false
+      - reports/metrics.json:
+          cache: false

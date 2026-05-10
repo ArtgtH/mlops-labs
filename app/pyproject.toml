@@ -5,28 +5,45 @@ description = ""
 authors = [
     {name = "artem",email = "a.vichuk@skbkontur.ru"}
 ]
-requires-python = ">=3.14"
+requires-python = ">=3.11,<3.15"
 dependencies = [
     "fastapi (>=0.135.1,<0.136.0)",
-    "granian (>=2.7.2,<3.0.0)"
+    "granian (>=2.7.4,<3.0.0)",
+    "joblib (>=1.5.2,<2.0.0)",
+    "numpy (>=1.26.4,<2.0.0)",
+    "pandas (>=2.2,<3)",
+    "scikit-learn (>=1.8.0,<2.0.0)"
 ]
 
 
 [dependency-groups]
 eda = [
-    "numpy (>=2.4.2,<3.0.0)",
+    "numpy (>=1.26.4,<2.0.0)",
     "matplotlib (>=3.10.8,<4.0.0)",
     "seaborn (>=0.13.2,<0.14.0)",
     "jupyter (>=1.1.1,<2.0.0)",
-    "scipy (>=1.17.1,<2.0.0)",
+    "scipy (>=1.11.0,<2.0.0)",
     "notebook (>=7.5.4,<8.0.0)",
     "scikit-learn (>=1.8.0,<2.0.0)",
     "pandas (>=2.2,<3)",
     "mlflow (>=3.10.1,<4.0.0)"
 ]
 test = [
-    "pytest (>=9.0.2,<10.0.0)",
-    "ruff (>=0.15.5,<0.16.0)"
+    "pytest (>=9.0.3,<10.0.0)",
+    "pytest-cov (>=7.0.0,<8.0.0)",
+    "httpx (>=0.28.1,<0.29.0)",
+    "ruff (>=0.15.5,<0.16.0)",
+    "flake8 (>=7.3.0,<8.0.0)",
+    "pip-audit (>=2.9.0,<3.0.0)",
+    "pygments (>=2.20.0,<3.0.0)",
+    "requests (>=2.33.0,<3.0.0)"
+]
+pipeline = [
+    "dvc[s3] (>=3.60.0,<4.0.0)",
+    "great-expectations (>=0.18.22,<0.19.0)",
+    "mlflow (>=3.11.1,<4.0.0)",
+    "pyyaml (>=6.0.0,<7.0.0)",
+    "scipy (>=1.11.0,<2.0.0)"
 ]
 
 
@@ -79,6 +96,10 @@ no-lines-before = ["local-folder"]
     "S101", # asserts allowed in tests...
 ]
 "__init__.py" = ["F401"] # unused imports
+
+[tool.pytest.ini_options]
+addopts = "--cov=src --cov=main --cov-report=term-missing --cov-fail-under=80"
+testpaths = ["tests"]
 
 
 [build-system]

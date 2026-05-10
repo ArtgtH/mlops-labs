@@ -1,3 +1,6 @@
+data:
+  url: https://www.openml.org/data/download/22102452/dataset
+
 split:
   test_size: 0.2
   random_state: 123
@@ -12,5 +15,5 @@ logreg:
   C: 1.0
 
 random_forest:
-  n_estimators: 300
+  n_estimators: 100
   max_depth: null

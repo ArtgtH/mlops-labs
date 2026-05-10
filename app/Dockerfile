@@ -1,4 +1,4 @@
-ARG PYTHON_VERSION=3.14
+ARG PYTHON_VERSION=3.12
 
 FROM python:${PYTHON_VERSION}-slim AS base
 ENV \
@@ -33,7 +33,7 @@ COPY . .
 
 FROM base AS test_build
 
-RUN poetry install --with test --no-root
+RUN poetry install --only main,test --no-root
 
 COPY . .
 
@@ -43,6 +43,7 @@ RUN poetry install --only main --no-root
 
 COPY ./src /app/src
 COPY ./main.py /app/main.py
+COPY ./models /app/models
 
 FROM python:${PYTHON_VERSION}-slim AS deploy_build
 ENV PYTHONDONTWRITEBYTECODE=1 \
@@ -53,6 +54,9 @@ WORKDIR /app
 COPY --from=deploy_builder /usr/local /usr/local
 COPY --from=deploy_builder /app/src /app/src
 COPY --from=deploy_builder /app/main.py /app/main.py
+COPY --from=deploy_builder /app/models /app/models
 
 RUN useradd -m -u 10001 appuser && chown -R appuser:appuser /app
 USER appuser
+
+CMD ["granian", "--interface", "asgi", "main:app", "--host", "0.0.0.0", "--port", "8000"]

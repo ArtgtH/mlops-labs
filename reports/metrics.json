@@ -1,20 +1,55 @@
 {
   "target_col": "Class",
+  "feature_columns": [
+    "Time",
+    "V1",
+    "V2",
+    "V3",
+    "V4",
+    "V5",
+    "V6",
+    "V7",
+    "V8",
+    "V9",
+    "V10",
+    "V11",
+    "V12",
+    "V13",
+    "V14",
+    "V15",
+    "V16",
+    "V17",
+    "V18",
+    "V19",
+    "V20",
+    "V21",
+    "V22",
+    "V23",
+    "V24",
+    "V25",
+    "V26",
+    "V27",
+    "V28",
+    "Amount"
+  ],
   "n_features": 30,
   "train_rows": 227845,
   "valid_rows": 56962,
   "results": {
     "logreg": {
+      "valid_recall_fraud": 0.8673469387755102,
+      "valid_f1_fraud": 0.12686567164179105,
       "valid_roc_auc": 0.9609465620800937,
-      "valid_pr_auc": 0.6893969360092937,
-      "valid_accuracy": 0.979459990871107
+      "valid_pr_auc": 0.6893969360092937
     },
     "random_forest": {
-      "valid_roc_auc": 0.9405584071698461,
-      "valid_pr_auc": 0.8089028203311296,
-      "valid_accuracy": 0.9993328885923949
+      "valid_recall_fraud": 0.6530612244897959,
+      "valid_f1_fraud": 0.7710843373493976,
+      "valid_roc_auc": 0.9270348227923696,
+      "valid_pr_auc": 0.7996003424721378
     }
   },
   "best_model": "logreg",
-  "best_valid_roc_auc": 0.9609465620800937
+  "best_valid_recall_fraud": 0.8673469387755102,
+  "best_valid_f1_fraud": 0.12686567164179105
 }
