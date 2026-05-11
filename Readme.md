@@ -2,7 +2,7 @@
 
 Проект реализует полный цикл ML-системы для датасета Credit Card Fraud Detection:
 загрузка данных, DVC-версионирование, Great Expectations validation, обучение моделей,
-MLflow tracking, FastAPI serving, Docker и GitLab CI/CD.
+MLflow tracking, FastAPI serving, Docker и GitHub Actions CI/CD.
 
 ## Цели и метрики
 
@@ -18,6 +18,10 @@ MLflow tracking, FastAPI serving, Docker и GitLab CI/CD.
 - fraud recall: `0.8673`
 - fraud F1: `0.1269`
 
+Выбор модели выполняется в `scripts/train.py`: LogisticRegression и RandomForest
+логируются как отдельные MLflow runs, затем лучшая модель выбирается по `Recall`
+для fraud-класса, с `F1` и `PR-AUC` как дополнительными критериями.
+
 ## Структура
 
 - `scripts/load_data.py` - скачивает raw датасет из OpenML.
@@ -28,7 +32,8 @@ MLflow tracking, FastAPI serving, Docker и GitLab CI/CD.
 - `app/main.py` - FastAPI service.
 - `app/src/model_service.py` - загрузка `models/model.pkl` и inference.
 - `app/tests/` - unit и integration tests.
-- `.gitlab-ci.yml` - GitLab CI/CD.
+- `.github/workflows/ci.yml` - lint, tests, audit и DVC pipeline.
+- `.github/workflows/release.yml` - release image по git-тегам.
 
 ## Локальный запуск пайплайна
 
@@ -49,6 +54,8 @@ MLFLOW_TRACKING_URI=file:mlruns dvc repro
 - `models/feature_columns.json`
 
 Данные и модели не коммитятся напрямую, их состояние фиксируется в `dvc.lock`.
+Raw, train/test split и модели являются DVC outputs, поэтому их версии
+определяются md5-хэшами в `dvc.lock`.
 
 ## MLflow
 
@@ -65,6 +72,9 @@ UI будет доступен на `http://localhost:5000`.
 ```bash
 MLFLOW_TRACKING_URI=http://localhost:5000 dvc repro
 ```
+
+При локальном запуске с `MLFLOW_TRACKING_URI=file:mlruns` результаты runs лежат
+в `mlruns/`. В GitHub Actions этот каталог загружается как artifact workflow.
 
 ## API
 
@@ -100,28 +110,33 @@ docker run --rm mlops-app-test sh -lc "flake8 . && ruff check . && pytest && pip
 
 Coverage gate задан в `app/pyproject.toml`: `--cov-fail-under=80`.
 
-## GitLab CI/CD
+## GitHub Actions CI/CD
 
 Pipeline:
-- `lint`: `flake8` и `ruff`, matrix Python `3.11`/`3.12`.
-- `tests`: `pytest` + coverage artifact, matrix Python `3.11`/`3.12`.
-- `dependency_audit`: `pip-audit`.
-- `dvc_pipeline`: `dvc pull || dvc repro`, Great Expectations, training, model artifacts.
-- `release_image`: сборка и публикация Docker image по тегам `v*.*.*`.
+- `lint-and-tests`: `flake8`, `ruff`, `pytest` + coverage artifact, matrix Python `3.11`/`3.12`.
+- `dependency-audit`: `pip-audit`.
+- `dvc-pipeline`: `dvc pull || true`, `dvc repro`, Great Expectations, training, model and MLflow artifacts.
+- `release-image`: сборка, smoke-test и публикация Docker image по тегам `v*.*.*`.
 
-Образы публикуются в GitLab Container Registry:
-
-```text
-$CI_REGISTRY_IMAGE/app:$CI_COMMIT_TAG
-$CI_REGISTRY_IMAGE/app:latest
-```
-
-Для этого репозитория это будет формат:
+Release workflow публикует образы в Docker Hub:
 
 ```text
-registry.gitlab.com/itmo-labs1/mlops/app:v1.2.3
-registry.gitlab.com/itmo-labs1/mlops/app:latest
+<dockerhub-user-or-org>/mlops-labs:<git-tag>
+<dockerhub-user-or-org>/mlops-labs:latest
 ```
 
-Release job перед сборкой копирует модель из artifacts `dvc_pipeline` в `app/models`,
-затем выполняет smoke-test `/health` и `/predict`.
+Для публикации нужно добавить GitHub repository secrets:
+- `DOCKERHUB_USERNAME`
+- `DOCKERHUB_TOKEN`
+
+Опционально можно задать repository variable:
+- `DOCKERHUB_REPOSITORY`, например `artgth/mlops-labs`
+
+Если `DOCKERHUB_REPOSITORY` не задан, workflow использует:
+
+```text
+${DOCKERHUB_USERNAME}/mlops-labs
+```
+
+Release job перед сборкой выполняет `dvc repro`, копирует модель в `app/models`,
+собирает image, выполняет smoke-test `/health` и `/predict`, затем пушит image.
