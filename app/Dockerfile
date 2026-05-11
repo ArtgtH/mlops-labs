@@ -8,7 +8,7 @@ ENV \
   POETRY_HOME=/opt/poetry \
   POETRY_VIRTUALENVS_CREATE=false \
   POETRY_NO_INTERACTION=1 \
-  POETRY_VERSION=2.2.1 \
+  POETRY_VERSION=2.3.4 \
   POETRY_NO_ANSI=1 \
   PATH="/opt/poetry/bin:${PATH}" \
   PYTHONPATH=/app/src
